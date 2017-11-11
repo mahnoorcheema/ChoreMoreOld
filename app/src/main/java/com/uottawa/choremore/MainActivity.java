@@ -1,5 +1,6 @@
 package com.uottawa.choremore;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,7 +13,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.uottawa.choremore.models.Chore;
 import com.uottawa.choremore.models.Individual;
@@ -25,6 +28,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private List<Chore> chores;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,8 +41,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                startActivity(new Intent(MainActivity.this, EditChoreActivity.class));
             }
         });
 
@@ -46,6 +50,8 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -61,13 +67,21 @@ public class MainActivity extends AppCompatActivity
         List<Individual> someIndividuals = new LinkedList<>();
         someIndividuals.add(bob);
         someIndividuals.add(charlie);
-        List<Chore> chores = new LinkedList<>();
+        chores = new LinkedList<>();
         chores.add(new Chore("Clean the sink", allIndividuals, false, 7, new Date()));
         chores.add(new Chore("Take out the trash", someIndividuals, true, 7, new Date()));
         chores.add(new Chore("Make android app", allIndividuals, false, 7, new Date()));
 
         ListView choreListView = (ListView)findViewById(R.id.lv_main_chores);
         choreListView.setAdapter(new ChoreArrayAdapter(getApplicationContext(), R.layout.chore_list_item, chores));
+        choreListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                clickEditChore(position);
+                //Todo: Investigate if consuming event prevents checkbox listeners from working
+                return false;
+            }
+        });
     }
 
     @Override
@@ -78,6 +92,10 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+    }
+
+    public void clickEditChore(int position) {
+        Toast.makeText(getApplicationContext(), chores.get(position).getTitle(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
